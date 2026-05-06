@@ -1,9 +1,7 @@
 
 /**
- * Write a description of class main here.
- *
- * @author (your name)
- * @version (a version number or a date)
+ * Liam vs Evil Liam 2: Ultimate edition is the pinnacle of gaming.
+ * Fueled with the tears of many programmers, it delivers a unique experience catered towards casual players and extreme gamers alike.
  */
 public class main
 {
