@@ -3,10 +3,12 @@
  * Fueled with the tears of many programmers, it delivers a unique experience catered towards casual players and extreme gamers alike.
  */
 
-import javax.swing.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferStrategy;
+import javax.swing.*;
 import java.util.Random;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -24,7 +26,7 @@ public class main
 
 
     private int playerX = 0;
-    private int playerY = 0;
+    private int playerY = 1;
 
 
     // level for testing. Will make level be inputted as string before playing later.
@@ -79,10 +81,10 @@ public class main
 
         // puts window in center of screen
         frame.setLocationRelativeTo(null); 
-
         frame.createBufferStrategy(2);
-
         frame.requestFocus();
+
+        frame.addKeyListener(new TAdapter());
 
         update(frame);
 
@@ -94,7 +96,6 @@ public class main
 
     // runs every frame, the input 'frame' variable is the window
     private void update(JFrame frame) {
-        System.out.println("hi");
 
         BufferStrategy bufferStrategy = frame.getBufferStrategy();
         if (bufferStrategy == null) {
@@ -103,6 +104,8 @@ public class main
         }
 
         Graphics g = bufferStrategy.getDrawGraphics();
+
+        g.translate(8, 0);
 
         drawWalls(g);
         drawPlayer(g);
@@ -114,6 +117,14 @@ public class main
     private void drawWalls(Graphics g) {
         g.setColor(Color.BLUE); // wall color
 
+        g.fillRect(0, WINDOW_BAR_HEIGHT, TILE_SIZE * 15, TILE_SIZE); // top
+        g.fillRect(0, WINDOW_BAR_HEIGHT, TILE_SIZE, TILE_SIZE * 15); // left
+        g.fillRect(0, WINDOW_BAR_HEIGHT + TILE_SIZE * 14, TILE_SIZE * 15, TILE_SIZE); // bottom
+        g.fillRect(TILE_SIZE * 14, WINDOW_BAR_HEIGHT, TILE_SIZE, TILE_SIZE * 15); // right
+
+        g.setColor(Color.MAGENTA); // wall color
+
+
         for (int y = 0; y < wallsOne.length; y++) {
             for (int x = 0; x < wallsOne[y].length; x++) {
                 if (wallsOne[y][x] == 1) {
@@ -124,8 +135,38 @@ public class main
     }
 
     private void drawPlayer(Graphics g) {
-        g.setColor(Color.YELLOW); // player color
+        g.setColor(Color.RED); // player color
 
-        g.fillOval(TILE_SIZE + playerX, TILE_SIZE + playerY + WINDOW_BAR_HEIGHT, TILE_SIZE, TILE_SIZE);
+        g.fillOval(TILE_SIZE + playerX * TILE_SIZE, TILE_SIZE + playerY * TILE_SIZE + WINDOW_BAR_HEIGHT, TILE_SIZE, TILE_SIZE);
+    }
+
+    // class for detecting key presses
+    private class TAdapter extends KeyAdapter {
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+
+            int key = e.getKeyCode();
+
+            if ((key == KeyEvent.VK_LEFT || key == KeyEvent.VK_A)) {
+                System.out.println("left");
+            }
+
+            if ((key == KeyEvent.VK_RIGHT || key == KeyEvent.VK_D)) {
+                System.out.println("right");
+            }
+
+            if ((key == KeyEvent.VK_UP || key == KeyEvent.VK_W)) {
+                System.out.println("up");
+            }
+
+            if ((key == KeyEvent.VK_DOWN || key == KeyEvent.VK_S)) {
+                System.out.println("down");
+            }
+
+            if ((key == KeyEvent.VK_SPACE || key == KeyEvent.VK_ENTER)) {
+                System.out.println("space / enter");
+            }
+        }
     }
 }
