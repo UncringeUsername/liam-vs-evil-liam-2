@@ -20,11 +20,14 @@ public class main
 
     private static final int TILE_SIZE = 50;
 
-    float fps = 60;
+    float fps = 600;
 
 
     private int playerX = 0;
     private int playerY = 1;
+
+    private float playerXSmooth = 0;
+    private float playerYSmooth = 1;
 
     // level for testing. Will make level be inputted as string before playing later.
     int[][] wallsOne = {
@@ -112,6 +115,14 @@ public class main
         clearGraphics(g);
 
         drawWalls(g);
+
+        playerXSmooth += Math.signum(playerX - playerXSmooth) * 0.5f;
+        playerXSmooth = (float) (Math.round(playerXSmooth * 10.0) / 10.0);
+
+        playerYSmooth += Math.signum(playerY - playerYSmooth) * 0.5f;
+        playerYSmooth = (float) (Math.round(playerYSmooth * 10.0) / 10.0);
+
+
         drawPlayer(g);
 
         g.dispose();
@@ -156,7 +167,19 @@ public class main
     private void drawPlayer(Graphics g) {
         g.setColor(Color.RED); // player color
 
-        g.fillOval(TILE_SIZE + playerX * TILE_SIZE, TILE_SIZE + playerY * TILE_SIZE + 0, TILE_SIZE, TILE_SIZE);
+        g.fillOval(TILE_SIZE + (int)(playerXSmooth * TILE_SIZE), TILE_SIZE + (int)(playerYSmooth * TILE_SIZE), TILE_SIZE, TILE_SIZE);
+    }
+
+    // change variables are for which direction player has pressed eg. if xChange is -1 then left pressed
+    private void calculateNextPlayerPosition(int xChange, int yChange) {
+
+        while (playerY >= 0 && playerY < 13 && playerX >= 0 && playerX < 13 && currentWalls[playerY][playerX] != 1) {
+            playerX += xChange;
+            playerY += yChange;
+        }
+        playerX -= xChange;
+        playerY -= yChange;
+        System.out.println(playerX + "  " + playerY);
     }
 
     // class for detecting key presses
@@ -169,18 +192,22 @@ public class main
 
             if ((key == KeyEvent.VK_LEFT || key == KeyEvent.VK_A)) {
                 System.out.println("left");
+                calculateNextPlayerPosition(-1, 0);
             }
 
             if ((key == KeyEvent.VK_RIGHT || key == KeyEvent.VK_D)) {
                 System.out.println("right");
+                calculateNextPlayerPosition(1, 0);
             }
 
             if ((key == KeyEvent.VK_UP || key == KeyEvent.VK_W)) {
                 System.out.println("up");
+                calculateNextPlayerPosition(0, -1);
             }
 
             if ((key == KeyEvent.VK_DOWN || key == KeyEvent.VK_S)) {
                 System.out.println("down");
+                calculateNextPlayerPosition(0, 1);
             }
 
             if ((key == KeyEvent.VK_SPACE || key == KeyEvent.VK_ENTER)) {
