@@ -23,6 +23,9 @@ public class main
     float fps = 600;
 
 
+    private int playerStartX = 0;
+    private int playerStartY = 1;
+
     private int playerX = 0;
     private int playerY = 1;
 
@@ -33,7 +36,7 @@ public class main
 
     // level for testing. Will make level be inputted as string before playing later.
     int[][] wallsOne = {
-        {1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -49,7 +52,7 @@ public class main
     };
 
     int[][] wallsTwo = {
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -62,6 +65,37 @@ public class main
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    };
+
+    // win arrays have one less column + row, because a win tile size is 2x2
+    int[][] winArrayOne = {
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    };
+
+    int[][] winArrayTwo = {
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     };
 
     // current walls are visible, collidable ones
@@ -101,6 +135,8 @@ public class main
 
         loadImages();
 
+        resetPlayerPosition();
+
         update(frame);
 
         // timer which calls 'update' fps times per second
@@ -113,7 +149,14 @@ public class main
 
     private void loadImages() {
         playerImage = new ImageIcon(images_folder + "/player.png");
-        System.out.println(playerImage.getIconWidth());
+        winImage = new ImageIcon(images_folder + "/win.png");
+    }
+
+    private void resetPlayerPosition() {
+        playerX = playerStartX;
+        playerY = playerStartY;
+        playerXSmooth = playerStartX;
+        playerYSmooth = playerStartY;
     }
 
     // runs every frame, the input 'frame' variable is the window
@@ -136,15 +179,12 @@ public class main
         canMove = false;
 
         if (playerXSmooth != playerX) {
-            System.out.println(playerXSmooth + "    " + playerX * TILE_SIZE);
             playerXSmooth += Math.signum(playerX - playerXSmooth) * 0.5f;
             playerXSmooth = (float) (Math.round(playerXSmooth * 10.0) / 10.0);
         } else if (playerYSmooth != playerY) {
-            System.out.println("moving vertically");
             playerYSmooth += Math.signum(playerY - playerYSmooth) * 0.5f;
             playerYSmooth = (float) (Math.round(playerYSmooth * 10.0) / 10.0);
         } else {
-            System.out.println("not moving");
             canMove = true;
         }
 
@@ -188,6 +228,11 @@ public class main
             currentWalls = wallsTwo;
         } else {
             currentWalls = wallsOne;
+        }
+
+        // if player inside wall, reset player position
+        if (currentWalls[playerY][playerX] == 1) {
+            resetPlayerPosition();
         }
     }
 
