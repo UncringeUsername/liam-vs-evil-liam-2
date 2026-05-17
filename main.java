@@ -29,6 +29,8 @@ public class main
     private float playerXSmooth = 0;
     private float playerYSmooth = 1;
 
+    private boolean canMove = true;
+
     // level for testing. Will make level be inputted as string before playing later.
     int[][] wallsOne = {
         {1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -67,8 +69,14 @@ public class main
     private int[][] currentWalls = wallsOne;
     private int[][] altWalls = wallsOne;
 
-    public main()
-    {
+
+    private ImageIcon playerImage;
+    private ImageIcon wallActiveImage;
+    private ImageIcon wallUnactiveImage;
+    private ImageIcon backgroundImage;
+    private ImageIcon winImage;
+
+    public main() {
         // creates 'window'
         JFrame frame = new JFrame("Liam vs Evil Liam 2");
 
@@ -91,12 +99,21 @@ public class main
 
         frame.addKeyListener(new TAdapter());
 
+        loadImages();
+
         update(frame);
 
         // timer which calls 'update' fps times per second
         Timer updateTimer = new Timer((int) (1000.0 / fps), e -> update(frame));
 
         updateTimer.start();
+    }
+
+    private String images_folder = "images";
+
+    private void loadImages() {
+        playerImage = new ImageIcon(images_folder + "/player.png");
+        System.out.println(playerImage.getIconWidth());
     }
 
     // runs every frame, the input 'frame' variable is the window
@@ -116,11 +133,21 @@ public class main
 
         drawWalls(g);
 
-        playerXSmooth += Math.signum(playerX - playerXSmooth) * 0.5f;
-        playerXSmooth = (float) (Math.round(playerXSmooth * 10.0) / 10.0);
+        canMove = false;
 
-        playerYSmooth += Math.signum(playerY - playerYSmooth) * 0.5f;
-        playerYSmooth = (float) (Math.round(playerYSmooth * 10.0) / 10.0);
+        if (playerXSmooth != playerX) {
+            System.out.println(playerXSmooth + "    " + playerX * TILE_SIZE);
+            playerXSmooth += Math.signum(playerX - playerXSmooth) * 0.5f;
+            playerXSmooth = (float) (Math.round(playerXSmooth * 10.0) / 10.0);
+        } else if (playerYSmooth != playerY) {
+            System.out.println("moving vertically");
+            playerYSmooth += Math.signum(playerY - playerYSmooth) * 0.5f;
+            playerYSmooth = (float) (Math.round(playerYSmooth * 10.0) / 10.0);
+        } else {
+            System.out.println("not moving");
+            canMove = true;
+        }
+
 
 
         drawPlayer(g);
@@ -129,7 +156,7 @@ public class main
         bufferStrategy.show();
     }
 
-    private void clearGraphics(Graphics g){
+    private void clearGraphics(Graphics g) {
         g.setColor(Color.WHITE);
 
         g.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -165,9 +192,7 @@ public class main
     }
 
     private void drawPlayer(Graphics g) {
-        g.setColor(Color.RED); // player color
-
-        g.fillOval(TILE_SIZE + (int)(playerXSmooth * TILE_SIZE), TILE_SIZE + (int)(playerYSmooth * TILE_SIZE), TILE_SIZE, TILE_SIZE);
+        g.drawImage(playerImage.getImage(), TILE_SIZE + (int)(playerXSmooth * TILE_SIZE), TILE_SIZE + (int)(playerYSmooth * TILE_SIZE), TILE_SIZE, TILE_SIZE, null);
     }
 
     // change variables are for which direction player has pressed eg. if xChange is -1 then left pressed
@@ -190,29 +215,31 @@ public class main
 
             int key = e.getKeyCode();
 
-            if ((key == KeyEvent.VK_LEFT || key == KeyEvent.VK_A)) {
-                System.out.println("left");
-                calculateNextPlayerPosition(-1, 0);
-            }
+            if (canMove) {
+                if ((key == KeyEvent.VK_LEFT || key == KeyEvent.VK_A)) {
+                    System.out.println("left");
+                    calculateNextPlayerPosition(-1, 0);
+                }
 
-            if ((key == KeyEvent.VK_RIGHT || key == KeyEvent.VK_D)) {
-                System.out.println("right");
-                calculateNextPlayerPosition(1, 0);
-            }
+                if ((key == KeyEvent.VK_RIGHT || key == KeyEvent.VK_D)) {
+                    System.out.println("right");
+                    calculateNextPlayerPosition(1, 0);
+                }
 
-            if ((key == KeyEvent.VK_UP || key == KeyEvent.VK_W)) {
-                System.out.println("up");
-                calculateNextPlayerPosition(0, -1);
-            }
+                if ((key == KeyEvent.VK_UP || key == KeyEvent.VK_W)) {
+                    System.out.println("up");
+                    calculateNextPlayerPosition(0, -1);
+                }
 
-            if ((key == KeyEvent.VK_DOWN || key == KeyEvent.VK_S)) {
-                System.out.println("down");
-                calculateNextPlayerPosition(0, 1);
-            }
+                if ((key == KeyEvent.VK_DOWN || key == KeyEvent.VK_S)) {
+                    System.out.println("down");
+                    calculateNextPlayerPosition(0, 1);
+                }
 
-            if ((key == KeyEvent.VK_SPACE || key == KeyEvent.VK_ENTER)) {
-                System.out.println("space / enter");
-                swapWalls();
+                if ((key == KeyEvent.VK_SPACE || key == KeyEvent.VK_ENTER)) {
+                    System.out.println("space / enter");
+                    swapWalls();
+                }
             }
         }
     }
