@@ -36,35 +36,35 @@ public class main
 
     // level for testing. Will make level be inputted as string before playing later.
     int[][] wallsOne = {
-        {1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0},
+        {0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     };
 
     int[][] wallsTwo = {
-        {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
-        {0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0},
-        {0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0},
-        {0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1},
+        {0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1},
+        {0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1},
+        {0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1},
+        {0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1},
     };
 
     // win arrays have one less column + row, because a win tile size is 2x2
@@ -101,7 +101,10 @@ public class main
     // current walls are visible, collidable ones
     // alt and current flip when space key pressed
     private int[][] currentWalls = wallsOne;
-    private int[][] altWalls = wallsOne;
+    private int[][] altWalls = wallsTwo;
+
+    private int[][] currentWins = winArrayOne;
+    private int[][] altWins = winArrayTwo;
 
 
     private ImageIcon playerImage;
@@ -174,7 +177,7 @@ public class main
 
         clearGraphics(g);
 
-        drawWalls(g);
+        drawElements(g); // draws walls and win Liams
 
         canMove = false;
 
@@ -188,8 +191,6 @@ public class main
             canMove = true;
         }
 
-
-
         drawPlayer(g);
 
         g.dispose();
@@ -202,16 +203,44 @@ public class main
         g.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     }
 
-    private void drawWalls(Graphics g) {
-        g.setColor(Color.BLUE); // wall color
+    private void drawElements(Graphics g) {
+        // border
+        g.setColor(Color.decode("#70b0db")); // wall color
 
         g.fillRect(0, 0, TILE_SIZE * 15, TILE_SIZE); // top
         g.fillRect(0, 0, TILE_SIZE, TILE_SIZE * 15); // left
         g.fillRect(0, 0 + TILE_SIZE * 14, TILE_SIZE * 15, TILE_SIZE); // bottom
         g.fillRect(TILE_SIZE * 14, 0, TILE_SIZE, TILE_SIZE * 15); // right
 
-        g.setColor(Color.MAGENTA); // wall color
+        
+        drawInactiveElements(g);
+        drawActiveElements(g);
+    }
 
+    private void drawInactiveElements(Graphics g) {
+        // Inactive walls
+        g.setColor(Color.decode("#ebdcbe")); // wall color
+
+        for (int y = 0; y < altWalls.length; y++) {
+            for (int x = 0; x < altWalls[y].length; x++) {
+                if (altWalls[y][x] == 1) {
+                    g.fillRect(TILE_SIZE + x * TILE_SIZE, TILE_SIZE + y * TILE_SIZE + 0, TILE_SIZE, TILE_SIZE);
+                }
+            }
+        }
+
+        // Inactive win places
+        for (int y = 0; y < altWins.length; y++) {
+            for (int x = 0; x < altWins[y].length; x++) {
+                if (altWins[y][x] == 1) {
+                    g.drawImage(winImage.getImage(), TILE_SIZE + (int)(x * TILE_SIZE), TILE_SIZE + (int)(y * TILE_SIZE), TILE_SIZE * 2, TILE_SIZE * 2, null);
+                }
+            }
+        }
+    }
+    private void drawActiveElements(Graphics g) {
+        // Active walls
+        g.setColor(Color.decode("#70b0db")); // wall color
 
         for (int y = 0; y < currentWalls.length; y++) {
             for (int x = 0; x < currentWalls[y].length; x++) {
@@ -226,8 +255,10 @@ public class main
     private void swapWalls() {
         if (currentWalls == wallsOne) {
             currentWalls = wallsTwo;
+            altWalls = wallsOne;
         } else {
             currentWalls = wallsOne;
+            altWalls = wallsTwo;
         }
 
         // if player inside wall, reset player position
