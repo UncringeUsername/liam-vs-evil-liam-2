@@ -24,7 +24,7 @@ public class main
 
 
     private int playerStartX = 0;
-    private int playerStartY = 1;
+    private int playerStartY = 0;
 
     private int playerX = 0;
     private int playerY = 1;
@@ -41,7 +41,7 @@ public class main
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0},
@@ -56,8 +56,8 @@ public class main
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1},
@@ -74,12 +74,12 @@ public class main
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     };
 
@@ -106,12 +106,20 @@ public class main
     private int[][] currentWins = winArrayOne;
     private int[][] altWins = winArrayTwo;
 
+    private boolean altImages = false;
+
 
     private ImageIcon playerImage;
-    private ImageIcon wallActiveImage;
-    private ImageIcon wallUnactiveImage;
-    private ImageIcon backgroundImage;
-    private ImageIcon winImage;
+    private ImageIcon wallActiveImageOne;
+    private ImageIcon wallInactiveImageOne;
+    private ImageIcon wallActiveImageTwo;
+    private ImageIcon wallInactiveImageTwo;
+    private ImageIcon backgroundImageOne;
+    private ImageIcon backgroundImageTwo;
+    private ImageIcon winActiveImageOne;
+    private ImageIcon winInactiveImageOne;
+    private ImageIcon winActiveImageTwo;
+    private ImageIcon winInactiveImageTwo;
 
     public main() {
         // creates 'window'
@@ -152,7 +160,16 @@ public class main
 
     private void loadImages() {
         playerImage = new ImageIcon(images_folder + "/player.png");
-        winImage = new ImageIcon(images_folder + "/win.png");
+        wallActiveImageOne = new ImageIcon(images_folder + "/wall_active_1.png");
+        wallInactiveImageOne = new ImageIcon(images_folder + "/wall_inactive_1.png");
+        wallActiveImageTwo = new ImageIcon(images_folder + "/wall_active_2.png");
+        wallInactiveImageTwo = new ImageIcon(images_folder + "/wall_inactive_2.png");
+        backgroundImageOne = new ImageIcon(images_folder + "/background_1.png");
+        backgroundImageTwo = new ImageIcon(images_folder + "/background_2.png");
+        winActiveImageOne = new ImageIcon(images_folder + "/win_active_1.png");
+        winInactiveImageOne = new ImageIcon(images_folder + "/win_inactive_1.png");
+        winActiveImageTwo = new ImageIcon(images_folder + "/win_active_2.png");
+        winInactiveImageTwo = new ImageIcon(images_folder + "/win_inactive_2.png");
     }
 
     private void resetPlayerPosition() {
@@ -233,19 +250,31 @@ public class main
         for (int y = 0; y < altWins.length; y++) {
             for (int x = 0; x < altWins[y].length; x++) {
                 if (altWins[y][x] == 1) {
-                    g.drawImage(winImage.getImage(), TILE_SIZE + (int)(x * TILE_SIZE), TILE_SIZE + (int)(y * TILE_SIZE), TILE_SIZE * 2, TILE_SIZE * 2, null);
+                    g.drawImage(winInactiveImageOne.getImage(), TILE_SIZE + (int)(x * TILE_SIZE), TILE_SIZE + (int)(y * TILE_SIZE), TILE_SIZE * 2, TILE_SIZE * 2, null);
                 }
             }
         }
     }
-    private void drawActiveElements(Graphics g) {
+    private void drawActiveElements(Graphics g) { 
         // Active walls
-        g.setColor(Color.decode("#70b0db")); // wall color
+        ImageIcon wallImg = wallActiveImageOne;
+        if (altImages) {
+            wallImg = wallActiveImageTwo;
+        }
 
         for (int y = 0; y < currentWalls.length; y++) {
             for (int x = 0; x < currentWalls[y].length; x++) {
                 if (currentWalls[y][x] == 1) {
-                    g.fillRect(TILE_SIZE + x * TILE_SIZE, TILE_SIZE + y * TILE_SIZE + 0, TILE_SIZE, TILE_SIZE);
+                    g.drawImage(wallImg.getImage(), TILE_SIZE + x * TILE_SIZE, TILE_SIZE + y * TILE_SIZE + 0, TILE_SIZE, TILE_SIZE, null);
+                }
+            }
+        }
+
+        // Active win places
+        for (int y = 0; y < currentWins.length; y++) {
+            for (int x = 0; x < currentWins[y].length; x++) {
+                if (currentWins[y][x] == 1) {
+                    g.drawImage(winActiveImageOne.getImage(), TILE_SIZE + (int)(x * TILE_SIZE), TILE_SIZE + (int)(y * TILE_SIZE), TILE_SIZE * 2, TILE_SIZE * 2, null);
                 }
             }
         }
@@ -256,10 +285,18 @@ public class main
         if (currentWalls == wallsOne) {
             currentWalls = wallsTwo;
             altWalls = wallsOne;
+
+            currentWins = winArrayTwo;
+            altWins = winArrayOne;
         } else {
             currentWalls = wallsOne;
             altWalls = wallsTwo;
+
+            currentWins = winArrayOne;
+            altWins = winArrayTwo;
         }
+
+        altImages = !altImages;
 
         // if player inside wall, reset player position
         if (currentWalls[playerY][playerX] == 1) {
