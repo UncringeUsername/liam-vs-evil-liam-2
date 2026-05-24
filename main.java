@@ -183,15 +183,6 @@ public class main
     }
 
     private void drawElements(Graphics g) {
-        // border
-        g.setColor(Color.decode("#70b0db")); // wall color
-
-        g.fillRect(0, 0, TILE_SIZE * 15, TILE_SIZE); // top
-        g.fillRect(0, 0, TILE_SIZE, TILE_SIZE * 15); // left
-        g.fillRect(0, 0 + TILE_SIZE * 14, TILE_SIZE * 15, TILE_SIZE); // bottom
-        g.fillRect(TILE_SIZE * 14, 0, TILE_SIZE, TILE_SIZE * 15); // right
-
-        
         drawInactiveElements(g);
         drawActiveElements(g);
     }
@@ -232,6 +223,15 @@ public class main
                 // wins
                 else if (currentWalls[y][x] == 2) {
                     g.drawImage(winInactiveImage.getImage(), TILE_SIZE + (int)(x * TILE_SIZE), TILE_SIZE + (int)(y * TILE_SIZE), TILE_SIZE * 2, TILE_SIZE * 2, null);
+                }
+            }
+        }
+
+        // places the boxes on the edges
+        for (int i = 0; i < currentWalls.length + 2; i++) {
+            for (int j = 0; j < currentWalls.length + 2; j++) {
+                if (i == 0 || j == 0 || i == currentWalls.length + 1 || j == currentWalls.length + 1) {
+                    g.drawImage(wallImg.getImage(), i * TILE_SIZE, j * TILE_SIZE + 0, TILE_SIZE, TILE_SIZE, null);
                 }
             }
         }
