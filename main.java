@@ -1,6 +1,6 @@
 /**
- * Liam vs Evil Liam 2: Ultimate edition is the pinnacle of gaming.
- * Fueled with the tears of many programmers, it delivers a unique experience catered towards casual players and extreme gamers alike.
+ * Liam vs Evil Liam 2: Ultimate edition is a great advancement into the artistic medium of gaming.
+ * Fueled with the blood, sweat and tears of many programmers, it delivers a unique experience catered towards casual players and extreme gamers alike.
  */
 
 import java.awt.event.KeyEvent;
