@@ -47,7 +47,7 @@ public class main
         {0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0},
         {0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     };
 
@@ -160,6 +160,7 @@ public class main
 
         canMove = false;
 
+        // move the player image smoothly to final position
         if (playerXSmooth != playerX) {
             playerXSmooth += Math.signum(playerX - playerXSmooth) * 0.5f;
             playerXSmooth = (float) (Math.round(playerXSmooth * 10.0) / 10.0);
@@ -168,6 +169,19 @@ public class main
             playerYSmooth = (float) (Math.round(playerYSmooth * 10.0) / 10.0);
         } else {
             canMove = true;
+        }
+
+        // check if the player has won
+        for (int tileY = 0; tileY < currentWalls.length; tileY++) {
+            for (int tileX = 0; tileX < currentWalls.length; tileX++) {
+                if (currentWalls[tileY][tileX] == 2 && Math.abs(playerXSmooth - tileX) < 0.5 && Math.abs(playerYSmooth - tileY) < 0.5) {
+                    System.out.println("RAAAHHHH WIN WIN WIN");
+                } else if (playerXSmooth >= 1 && playerYSmooth >= 1 && tileX > 0 && tileY > 0 ) {
+                    if (currentWalls[tileY - 1][tileX - 1] == 2 && Math.abs(playerXSmooth - tileX) < 0.5 && Math.abs(playerYSmooth - tileY) < 0.5) {
+                        System.out.println("RAAAHHHH WIN WIN WIN");
+                    }
+                } 
+            }
         }
 
         drawPlayer(g);
@@ -202,7 +216,7 @@ public class main
                 }
                 // win positions
                 else if (altWalls[y][x] == 2) {
-                    g.drawImage(winActiveImage.getImage(), TILE_SIZE + (int)(x * TILE_SIZE), TILE_SIZE + (int)(y * TILE_SIZE), TILE_SIZE * 2, TILE_SIZE * 2, null);
+                    g.drawImage(winInactiveImage.getImage(), TILE_SIZE + (int)(x * TILE_SIZE), TILE_SIZE + (int)(y * TILE_SIZE), TILE_SIZE * 2, TILE_SIZE * 2, null);
                 }
             }
         }
@@ -222,7 +236,7 @@ public class main
                 }
                 // wins
                 else if (currentWalls[y][x] == 2) {
-                    g.drawImage(winInactiveImage.getImage(), TILE_SIZE + (int)(x * TILE_SIZE), TILE_SIZE + (int)(y * TILE_SIZE), TILE_SIZE * 2, TILE_SIZE * 2, null);
+                    g.drawImage(winActiveImage.getImage(), TILE_SIZE + (int)(x * TILE_SIZE), TILE_SIZE + (int)(y * TILE_SIZE), TILE_SIZE * 2, TILE_SIZE * 2, null);
                 }
             }
         }
@@ -266,6 +280,7 @@ public class main
             playerX += xChange;
             playerY += yChange;
         }
+        
         playerX -= xChange;
         playerY -= yChange;
         System.out.println(playerX + "  " + playerY);
@@ -280,29 +295,34 @@ public class main
             int key = e.getKeyCode();
 
             if (canMove) {
+                if ((key == KeyEvent.VK_SPACE || key == KeyEvent.VK_ENTER)) {
+                    System.out.println("space / enter");
+                    swapWalls();
+                    canMove = false;
+                }
+
                 if ((key == KeyEvent.VK_LEFT || key == KeyEvent.VK_A)) {
                     System.out.println("left");
                     calculateNextPlayerPosition(-1, 0);
+                    canMove = false;
                 }
 
                 if ((key == KeyEvent.VK_RIGHT || key == KeyEvent.VK_D)) {
                     System.out.println("right");
                     calculateNextPlayerPosition(1, 0);
+                    canMove = false;
                 }
 
                 if ((key == KeyEvent.VK_UP || key == KeyEvent.VK_W)) {
                     System.out.println("up");
                     calculateNextPlayerPosition(0, -1);
+                    canMove = false;
                 }
 
                 if ((key == KeyEvent.VK_DOWN || key == KeyEvent.VK_S)) {
                     System.out.println("down");
                     calculateNextPlayerPosition(0, 1);
-                }
-
-                if ((key == KeyEvent.VK_SPACE || key == KeyEvent.VK_ENTER)) {
-                    System.out.println("space / enter");
-                    swapWalls();
+                    canMove = false;
                 }
             }
         }
