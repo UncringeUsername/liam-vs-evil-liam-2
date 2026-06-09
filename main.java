@@ -12,6 +12,7 @@ import javax.swing.*;
 import java.util.Random;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.Arrays;
 
 public class main
 {
@@ -34,6 +35,12 @@ public class main
 
     private boolean canMove = true;
 
+    ArrayList<int[][]> levelData = new ArrayList<int[][]>(); // Big array containing all the wall placement information
+    // Stored arrays are in the order data for wallsOne, data for wallsTwo, data for wallsOne etc
+    // Also contains two integers at the start for the player position
+
+    ArrayList<int[]> playerData = new ArrayList<int[]>(); // Similar to above array, but stores player start position
+
     // level for testing. Will make level be inputted as string before playing later.
     int[][] wallsOne = {
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -41,14 +48,14 @@ public class main
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0},
-        {0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 0, 0},
-        {0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     };
 
     int[][] wallsTwo = {
@@ -111,6 +118,10 @@ public class main
         loadImages();
 
         resetPlayerPosition();
+
+        prepareLevel("1,3,00000000000000000000000000000000000000000000000000000000000000000000000010000000000001000000000000000000000000001110000111100100000000000010200020000000000000010000000000000000010000020000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000111110011010011111000000001111100000000111110000000011111");
+
+        prepareLevel(0);
 
         update(frame);
 
@@ -286,6 +297,84 @@ public class main
         System.out.println(playerX + "  " + playerY);
     }
 
+    private void prepareLevel(String input) {
+        // player starting X
+        int startX = 0;
+
+        int i = 0;
+        while(input.charAt(i) != ',') {
+            int currentNumber = input.charAt(i) - '0';
+            
+            startX *= 10;
+            startX += currentNumber;
+            i++;
+        }
+
+        input = input.substring(i + 1);
+
+        // player starting Y
+        int startY = 0;
+
+        i = 0;
+        while(input.charAt(i) != ',') {
+            int currentNumber = input.charAt(i) - '0';
+            
+            startY *= 10;
+            startY += currentNumber;
+            i++;
+        }
+
+        input = input.substring(i + 1);
+
+
+        int[] playerStartPos = new int[2];
+        playerStartPos[0] = startX;
+        playerStartPos[1] = startY;
+        playerData.add(playerStartPos);
+
+
+        int[][] level = new int[13][13];
+        for (int[] row : level) {
+            Arrays.fill(row, 0);
+        }
+        
+        for (i = 0; i < input.length(); i++) {
+
+            int currentNumber = input.charAt(i) - '0';
+
+            if (currentNumber >= 0 && currentNumber <= 2) {
+                level[i % (13 * 13) / 13][i % 13] = currentNumber;
+            } else {
+                level[i % (13 * 13) / 13][i % 13] = 0;
+            }
+            System.out.print(input.charAt(i));
+
+            if (i == 13 * 13 - 1) {
+                levelData.add(level);
+                System.out.println("level added");
+                level = new int[13][13];
+                for (int[] row : level) {
+                    Arrays.fill(row, 0);
+                }
+            }
+
+            if (i == 13 * 13 * 2 - 1) {
+                levelData.add(level);
+                i = input.length();
+            }
+        }
+        System.out.println("");
+    }
+
+    private void prepareLevel(int levelNum){
+        wallsOne = levelData.get(levelNum * 2);
+        wallsTwo = levelData.get(levelNum * 2 + 1);
+
+        playerStartX = playerData.get(levelNum)[0];
+        playerStartY = playerData.get(levelNum)[1];
+    }
+
+    // Luckyzelle
     // class for detecting key presses
     private class TAdapter extends KeyAdapter {
 
