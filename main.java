@@ -35,6 +35,8 @@ public class main
 
     private boolean canMove = true;
 
+    private BlackScreenState blackScreenState = BlackScreenState.OFF;
+
     ArrayList<int[][]> levelData = new ArrayList<int[][]>(); // Big array containing all the wall placement information
     // Stored arrays are in the order data for wallsOne, data for wallsTwo, data for wallsOne etc
     // Also contains two integers at the start for the player position
@@ -154,6 +156,8 @@ public class main
         playerYSmooth = playerStartY;
     }
 
+    boolean winningFrozen = false;
+
     // runs every frame, the input 'frame' variable is the window
     private void Update(JFrame frame) {
 
@@ -169,32 +173,38 @@ public class main
 
         clearGraphics(g);
 
-        drawElements(g); // draws walls and win Liams
+        drawElements(g); // draws walls and win Liams, and black screen
 
-        canMove = false;
-
+        if (!winningFrozen) {
+            canMove = true;
+        }
+        
         // move the player image smoothly to final position
         if (playerXSmooth != playerX) {
             playerXSmooth += Math.signum(playerX - playerXSmooth) * 0.5f;
             playerXSmooth = (float) (Math.round(playerXSmooth * 10.0) / 10.0);
-        } else if (playerYSmooth != playerY) {
+            canMove = false;
+        } 
+        if (playerYSmooth != playerY) {
             playerYSmooth += Math.signum(playerY - playerYSmooth) * 0.5f;
             playerYSmooth = (float) (Math.round(playerYSmooth * 10.0) / 10.0);
-        } else {
-            canMove = true;
+            canMove = false;
         }
 
-        // check if the player has won
-        for (int tileY = 0; tileY < currentWalls.length; tileY++) {
-            for (int tileX = 0; tileX < currentWalls.length; tileX++) {
-                if (currentWalls[tileY][tileX] == 2 && Math.abs(playerXSmooth - tileX) < 0.5 && Math.abs(playerYSmooth - tileY) < 0.5) {
-                    System.out.println("RAAAHHHH WIN WIN WIN");
-                    LoadNextLevel();
-                } else if (playerXSmooth >= 1 && playerYSmooth >= 1 && tileX > 0 && tileY > 0 ) {
-                    if (currentWalls[tileY - 1][tileX - 1] == 2 && Math.abs(playerXSmooth - tileX) < 0.5 && Math.abs(playerYSmooth - tileY) < 0.5) {
+        if (!winningFrozen) {
+            // check if the player has won
+            for (int tileY = 0; tileY < currentWalls.length; tileY++) {
+                for (int tileX = 0; tileX < currentWalls.length; tileX++) {
+                    if (currentWalls[tileY][tileX] == 2 && Math.abs(playerXSmooth - tileX) < 0.5 && Math.abs(playerYSmooth - tileY) < 0.5) {
                         System.out.println("RAAAHHHH WIN WIN WIN");
-                    }
-                } 
+                        LoadNextLevel();
+                    } else if (playerXSmooth >= 1 && playerYSmooth >= 1 && tileX > 0 && tileY > 0 ) {
+                        if (currentWalls[tileY - 1][tileX - 1] == 2 && Math.abs(playerXSmooth - tileX) < 0.5 && Math.abs(playerYSmooth - tileY) < 0.5) {
+                            System.out.println("RAAAHHHH WIN WIN WIN");
+                            LoadNextLevel();
+                        }
+                    } 
+                }
             }
         }
 
@@ -210,9 +220,43 @@ public class main
         g.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     }
 
+    int blackScreenOpacity = 0;
+
     private void drawElements(Graphics g) {
+        
         drawInactiveElements(g);
         drawActiveElements(g);
+
+        // black screen
+
+        switch (blackScreenState) {
+            case ON:
+                blackScreenOpacity = 255;
+                break;
+            case OFF:
+                blackScreenOpacity = 0;
+                break;
+            case FADEIN:
+                blackScreenOpacity += Math.ceil((255 - blackScreenOpacity) * 0.08);
+                if (blackScreenOpacity >= 255) {
+                    blackScreenOpacity = 255;
+                    blackScreenState = BlackScreenState.ON;
+                }
+                break;
+            case FADEOUT:
+                blackScreenOpacity -= Math.ceil((255 - blackScreenOpacity) * 0.08);
+                if (blackScreenOpacity <= 0) {
+                    blackScreenOpacity = 0;
+                    blackScreenState = BlackScreenState.OFF;
+                }
+                break;
+        }
+        Color black = new Color(0, 0, 0, blackScreenOpacity);
+        g.setColor(black);
+
+        g.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+
+        System.out.println(blackScreenOpacity);
     }
 
     private void drawInactiveElements(Graphics g) {
@@ -366,7 +410,7 @@ public class main
                 i = input.length();
 
                 if (input.indexOf('-') >= 0) {
-                    PrepareLevel(input.substring(input.indexOf('-')));
+                    PrepareLevel(input.substring(input.indexOf('-') + 1));
                 }
             }
         }
@@ -374,6 +418,10 @@ public class main
     }
 
     private void LoadNextLevel(){
+        winningFrozen = true;
+        blackScreenState = BlackScreenState.FADEIN;
+
+
         if (currentLevel + 1 < levelData.size() / 2) {
             LoadLevel(currentLevel + 1);
         } else {
@@ -394,6 +442,8 @@ public class main
 
             playerStartX = playerData.get(levelNum)[0];
             playerStartY = playerData.get(levelNum)[1];
+
+            System.out.println(playerData.get(levelNum)[0] + "    " + playerData.get(levelNum)[1]);
 
             playerX = playerStartX;
             playerY = playerStartY;
@@ -445,5 +495,12 @@ public class main
                 }
             }
         }
+    }
+
+    public enum BlackScreenState {
+        OFF,
+        ON,
+        FADEIN,
+        FADEOUT
     }
 }
