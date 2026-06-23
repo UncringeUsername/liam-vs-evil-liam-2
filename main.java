@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Arrays;
 
-public class main
+public class main implements ActionListener
 {
     private static final int WINDOW_WIDTH = 750; // each tile is 50 pixels square, 750 leaves space for 13 tiles + edges
     private static final int WINDOW_HEIGHT = 750;
@@ -33,7 +33,10 @@ public class main
     private float playerXSmooth = 0;
     private float playerYSmooth = 1;
 
+    private float playerSpeed = 0.5f;
+
     private boolean canMove = true;
+    private boolean finalWon = false;
 
     private BlackScreenState blackScreenState = BlackScreenState.OFF;
 
@@ -95,6 +98,7 @@ public class main
     private ImageIcon backgroundImageTwo;
     private ImageIcon winActiveImage;
     private ImageIcon winInactiveImage;
+    private ImageIcon finalWinImage;
 
     public main() {
         // creates 'window'
@@ -110,6 +114,8 @@ public class main
         frame.getContentPane().setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
         frame.pack();
 
+        CreateMenuBar(frame);
+
         frame.setVisible(true);
 
         // puts window in center of screen
@@ -123,8 +129,11 @@ public class main
 
         ResetPlayerPosition();
 
-        PrepareLevel("1,3,00000000000000000000000000000000000000000000000000000000000000000000000010000000000001000000000000000000000000001110000111100100000000000010200020000000000000010000000000000000010000020000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000111110011010011111000000001111100000000111110000000011111-0,3,11111111110000000000000000000000000000000000000000000000000000000000000010000000000001000000000000000000000000001110000111100100000000000010200020000000000000010000000000000000010000020000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000111110011010011111000000001111100000000111110000000011111");
+        PrepareLevel("8,12,00100100011110110010101111101011000100100101101011111111111111111001001120201101101110000110110011111111011011100001100100110000111111111000011111111111111111111110000110010010001111011001010111110101100010010010110101111111111111111100100112020110110111000011011001100001101101110000110010011111111111111100001111111110000111111111000011-12,12,11111111111011101111111101000011111100011011111111011111111111111111110000001111111000000111111100110020111110011000011011001111111000100111111110110000000011011000000001111111111101110111111110100001111110001101111111101111111111111111111000000111111100000011111110011002011111001100001101100111111100010011111111011000000001101100000000-1,11,00000000000000000020000000000000000000000110000011001111111111111110000000001111000010000111110011100111111001110011100000000000000000000000000000000000000000000000000000110000000110000000200000000000000000000000011100000111100000111111111000111111111100011111111111111111111111111111110000001000000000100100100000010010010000001000001000");
 
+        LoadPlayerData(0);
+        playerXSmooth = playerStartX;
+        playerYSmooth = playerStartY;
         LoadLevel(0);
 
         Update(frame);
@@ -147,6 +156,36 @@ public class main
         backgroundImageTwo = new ImageIcon(images_folder + "/background_2.png");
         winActiveImage = new ImageIcon(images_folder + "/win_active_1.png");
         winInactiveImage = new ImageIcon(images_folder + "/win_inactive_1.png");
+        finalWinImage = new ImageIcon(images_folder + "/final_win.png");
+    }
+
+    private void CreateMenuBar(JFrame frame) {
+        JMenuBar menuBar;
+        JMenu menu;
+        JMenuItem menuItem;
+
+        String[] menuItems = {"Small mode", "Big mode", "Dance", "Stop dancing"};
+
+        menuBar = new JMenuBar();
+        frame.setJMenuBar(menuBar);
+        menu = new JMenu("GAAHHHHH");
+        menuBar.add(menu);
+
+        for (String i : menuItems) {
+            menuItem = new JMenuItem(i);
+            menuItem.addActionListener(this); // Connects menu item to actionPerformed method
+            menu.add(menuItem);
+        }
+    }
+
+    public void actionPerformed(ActionEvent e) {
+        String cmd = e.getActionCommand();
+
+        switch(cmd) {
+            case "hi": // makes window really tiny
+                System.out.println("hi");
+                break;
+        }
     }
 
     private void ResetPlayerPosition() {
@@ -181,12 +220,12 @@ public class main
         
         // move the player image smoothly to final position
         if (playerXSmooth != playerX) {
-            playerXSmooth += Math.signum(playerX - playerXSmooth) * 0.5f;
+            playerXSmooth += Math.signum(playerX - playerXSmooth) * playerSpeed;
             playerXSmooth = (float) (Math.round(playerXSmooth * 10.0) / 10.0);
             canMove = false;
         } 
         if (playerYSmooth != playerY) {
-            playerYSmooth += Math.signum(playerY - playerYSmooth) * 0.5f;
+            playerYSmooth += Math.signum(playerY - playerYSmooth) * playerSpeed;
             playerYSmooth = (float) (Math.round(playerYSmooth * 10.0) / 10.0);
             canMove = false;
         }
@@ -208,7 +247,22 @@ public class main
             }
         }
 
+        if (blackScreenState == BlackScreenState.ON){
+            if (playerXSmooth == playerStartX && playerYSmooth == playerStartY) {
+                LoadPlayerData(currentLevel + 1);
+                LoadLevel(currentLevel + 1);
+                blackScreenState = BlackScreenState.FADEOUT;
+                winningFrozen = false;
+            } else {
+                LoadPlayerData(currentLevel + 1);
+            }
+        }
+
         drawPlayer(g);
+
+        if (finalWon) {
+            g.drawImage(finalWinImage.getImage(), 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, null);
+        }
 
         g.dispose();
         bufferStrategy.show();
@@ -225,7 +279,7 @@ public class main
     private void drawElements(Graphics g) {
         
         drawInactiveElements(g);
-        drawActiveElements(g);
+        drawActiveElements(g);  
 
         // black screen
 
@@ -244,10 +298,11 @@ public class main
                 }
                 break;
             case FADEOUT:
-                blackScreenOpacity -= Math.ceil((255 - blackScreenOpacity) * 0.08);
+                blackScreenOpacity -= Math.ceil(blackScreenOpacity * 0.08);
                 if (blackScreenOpacity <= 0) {
                     blackScreenOpacity = 0;
                     blackScreenState = BlackScreenState.OFF;
+                    canMove = true;
                 }
                 break;
         }
@@ -255,8 +310,6 @@ public class main
         g.setColor(black);
 
         g.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-
-        System.out.println(blackScreenOpacity);
     }
 
     private void drawInactiveElements(Graphics g) {
@@ -394,7 +447,6 @@ public class main
             } else {
                 level[i % (13 * 13) / 13][i % 13] = 0;
             }
-            System.out.print(input.charAt(i));
 
             if (i == 13 * 13 - 1) {
                 levelData.add(level);
@@ -414,18 +466,29 @@ public class main
                 }
             }
         }
-        System.out.println("");
     }
 
     private void LoadNextLevel(){
         winningFrozen = true;
-        blackScreenState = BlackScreenState.FADEIN;
-
 
         if (currentLevel + 1 < levelData.size() / 2) {
-            LoadLevel(currentLevel + 1);
+            blackScreenState = BlackScreenState.FADEIN;
         } else {
             System.out.println("Game finished yayayayayya!");
+            finalWon = true;
+        }
+    }
+
+    private void LoadPlayerData(int levelNum){
+        if (levelData.size() / 2 > levelNum) {
+
+            playerStartX = playerData.get(levelNum)[0];
+            playerStartY = playerData.get(levelNum)[1];
+
+            playerX = playerStartX;
+            playerY = playerStartY;
+        } else {
+            System.out.println("Attempting to load data that doesn't exist!");
         }
     }
 
@@ -439,14 +502,6 @@ public class main
             altWalls = wallsTwo;
 
             altImages = false;
-
-            playerStartX = playerData.get(levelNum)[0];
-            playerStartY = playerData.get(levelNum)[1];
-
-            System.out.println(playerData.get(levelNum)[0] + "    " + playerData.get(levelNum)[1]);
-
-            playerX = playerStartX;
-            playerY = playerStartY;
 
             currentLevel = levelNum;
         } else {
@@ -504,3 +559,137 @@ public class main
         FADEOUT
     }
 }
+
+
+
+/*
+
+level to introduce movement
+1 1 1 1 1 1 1 1 1 1 1 0 1
+1 1 0 1 1 1 1 1 1 1 1 0 1
+0 0 0 0 1 1 1 1 1 1 0 0 0
+1 1 0 1 1 1 1 1 1 1 1 0 1
+1 1 1 1 1 1 1 1 1 1 1 1 1
+1 1 1 1 1 0 0 0 0 0 0 1 1
+1 1 1 1 1 0 0 0 0 0 0 1 1
+1 1 1 1 1 0 0 1 1 0 0 2 0
+1 1 1 1 1 0 0 1 1 0 0 0 0
+1 1 0 1 1 0 0 1 1 1 1 1 1
+1 0 0 0 1 0 0 1 1 1 1 1 1
+1 1 0 1 1 0 0 0 0 0 0 0 0
+1 1 0 1 1 0 0 0 0 0 0 0 0
+
+1 1 1 1 1 1 1 1 1 1 1 0 1
+1 1 0 1 1 1 1 1 1 1 1 0 1
+0 0 0 0 1 1 1 1 1 1 0 0 0
+1 1 0 1 1 1 1 1 1 1 1 0 1
+1 1 1 1 1 1 1 1 1 1 1 1 1
+1 1 1 1 1 0 0 0 0 0 0 1 1
+1 1 1 1 1 0 0 0 0 0 0 1 1
+1 1 1 1 1 0 0 1 1 0 0 2 0
+1 1 1 1 1 0 0 1 1 0 0 0 0
+1 1 0 1 1 0 0 1 1 1 1 1 1
+1 0 0 0 1 0 0 1 1 1 1 1 1
+1 1 0 1 1 0 0 0 0 0 0 0 0
+1 1 0 1 1 0 0 0 0 0 0 0 0
+12,12,11111111111011101111111101000011111100011011111111011111111111111111110000001111111000000111111100110020111110011000011011001111111000100111111110110000000011011000000001111111111101110111111110100001111110001101111111101111111111111111111000000111111100000011111110011002011111001100001101100111111100010011111111011000000001101100000000
+
+
+
+
+level to introduce spaces
+0 0 1 0 0 1 0 0 0 1 1 1 1
+0 1 1 0 0 1 0 1 0 1 1 1 1
+1 0 1 0 1 1 0 0 0 1 0 0 1
+0 0 1 0 1 1 0 1 0 1 1 1 1
+1 1 1 1 1 1 1 1 1 1 1 1 1
+0 0 1 0 0 1 1 2 0 2 0 1 1
+0 1 1 0 1 1 1 0 0 0 0 1 1
+0 1 1 0 0 1 1 1 1 1 1 1 1
+0 1 1 0 1 1 1 0 0 0 0 1 1
+0 0 1 0 0 1 1 0 0 0 0 1 1
+1 1 1 1 1 1 1 0 0 0 0 1 1 
+1 1 1 1 1 1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 0 0 0 0 1 1 
+
+0 0 1 0 0 1 0 0 0 1 1 1 1
+0 1 1 0 0 1 0 1 0 1 1 1 1
+1 0 1 0 1 1 0 0 0 1 0 0 1
+0 0 1 0 1 1 0 1 0 1 1 1 1
+1 1 1 1 1 1 1 1 1 1 1 1 1
+0 0 1 0 0 1 1 2 0 2 0 1 1
+0 1 1 0 1 1 1 0 0 0 0 1 1
+0 1 1 0 0 1 1 0 0 0 0 1 1
+0 1 1 0 1 1 1 0 0 0 0 1 1
+0 0 1 0 0 1 1 1 1 1 1 1 1
+1 1 1 1 1 1 1 0 0 0 0 1 1 
+1 1 1 1 1 1 1 0 0 0 0 1 1 
+1 1 1 1 1 1 1 0 0 0 0 1 1 
+8,12,00100100011110110010101111101011000100100101101011111111111111111001001120201101101110000110110011111111011011100001100100110000111111111000011111111111111111111110000110010010001111011001010111110101100010010010110101111111111111111100100112020110110111000011011001100001101101110000110010011111111111111100001111111110000111111111000011
+
+level to introduce spaces 2
+1 1 1 1 1 1 1 1 1 1 1 1 1
+1 1 1 1 1 1 1 1 1 1 1 1 1
+1 1 1 1 1 1 1 1 1 1 1 1 1
+0 0 0 0 0 0 0 1 1 0 2 0 0
+0 0 0 0 0 0 0 1 1 0 0 0 0
+1 1 1 1 1 0 0 1 1 0 0 0 0
+1 1 1 1 1 0 0 1 1 1 1 1 1
+0 0 0 1 1 0 0 1 1 1 1 1 1
+0 0 0 1 1 0 0 0 0 0 0 0 0
+0 0 0 1 1 0 0 0 0 0 0 0 0
+1 1 1 1 1 1 1 1 1 1 1 1 1
+1 1 1 1 1 1 1 1 1 1 1 1 1
+1 1 1 1 1 1 1 1 1 1 1 1 1
+
+1 1 1 1 1 1 1 1 1 1 1 1 1
+1 1 1 1 1 1 1 1 1 1 1 1 1
+1 1 1 1 1 1 1 1 1 1 1 1 1
+0 0 0 0 0 0 0 1 1 0 2 0 0
+0 0 0 0 0 0 0 1 1 0 0 0 0
+0 0 0 1 1 1 1 1 1 0 0 0 0
+0 0 0 1 1 1 1 1 1 0 0 0 0
+0 0 0 1 1 1 1 1 1 0 0 0 0
+0 0 0 1 1 0 0 0 0 0 0 0 0
+0 0 0 1 1 0 0 0 0 0 0 0 0
+1 1 1 1 1 1 1 1 1 1 1 1 1
+1 1 1 1 1 1 1 1 1 1 1 1 1
+1 1 1 1 1 1 1 1 1 1 1 1 1
+1,8,11111111111111111111111111111111111111100000001102000000000110000111110011000011111001111110001100111111000110000000000011000000001111111111111111111111111111111111111111111111111111111111111111111111111111110000000110200000000011000000011111100000001111110000000111111000000011000000000001100000000111111111111111111111111111111111111111
+
+
+cool temple level
+0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 2 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 1 1 0 0 0 0 0 1 1 0 0
+1 1 1 1 1 1 1 1 1 1 1 1 1
+1 1 0 0 0 0 0 0 0 0 0 1 1
+1 1 0 0 0 0 1 0 0 0 0 1 1
+1 1 1 0 0 1 1 1 0 0 1 1 1
+1 1 1 0 0 1 1 1 0 0 1 1 1
+0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0
+
+0 1 1 0 0 0 0 0 0 0 1 1 0
+0 0 0 0 0 0 2 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 1 1 1 0 0 0 0 0
+1 1 1 1 0 0 0 0 0 1 1 1 1
+1 1 1 1 1 0 0 0 1 1 1 1 1
+1 1 1 1 1 0 0 0 1 1 1 1 1
+1 1 1 1 1 1 1 1 1 1 1 1 1
+1 1 1 1 1 1 1 1 1 1 1 1 1
+0 0 0 0 0 0 1 0 0 0 0 0 0
+0 0 0 1 0 0 1 0 0 1 0 0 0
+0 0 0 1 0 0 1 0 0 1 0 0 0
+0 0 0 1 0 0 0 0 0 1 0 0 0
+
+1,11,00000000000000000020000000000000000000000110000011001111111111111110000000001111000010000111110011100111111001110011100000000000000000000000000000000000000000000000000000110000000110000000200000000000000000000000011100000111100000111111111000111111111100011111111111111111111111111111110000001000000000100100100000010010010000001000001000
+
+Annoying wrap-around level:
+
+1,3,00000000000000000000000000000000000000000000000000000000000000000000000010000000000001000000000000000000000000001110000111100100000000000010200020000000000000010000000000000000010000020000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000111110011010011111000000001111100000000111110000000011111
+*/
