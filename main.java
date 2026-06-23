@@ -376,7 +376,9 @@ public class main implements ActionListener
 
         // if player inside wall, reset player position
         if (currentWalls[playerY][playerX] == 1) {
-            ResetPlayerPosition();
+            // Reloads the current level
+            currentLevel -= 1;
+            LoadNextLevel();
         }
     }
 
