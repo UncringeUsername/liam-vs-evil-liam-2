@@ -9,11 +9,14 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferStrategy;
 import javax.swing.*;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.util.Random;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Arrays;
 import java.io.IOException;
+import java.io.File;
 
 public class main implements ActionListener
 {
@@ -40,6 +43,8 @@ public class main implements ActionListener
 
     private boolean canMove = true;
     private boolean finalWon = false;
+
+    private boolean fileLoadedYet = false;
 
     private BlackScreenState blackScreenState = BlackScreenState.OFF;
 
@@ -103,6 +108,7 @@ public class main implements ActionListener
     private ImageIcon winInactiveImage;
     private ImageIcon finalWinImage;
     private ImageIcon fileButton;
+    private ImageIcon loadFileInfoImage;
 
     public main() {
         // creates 'window'
@@ -162,6 +168,7 @@ public class main implements ActionListener
         winInactiveImage = new ImageIcon(images_folder + "/win_inactive_1.png");
         finalWinImage = new ImageIcon(images_folder + "/final_win.png");
         fileButton = new ImageIcon(images_folder + "/file_button.png");
+        loadFileInfoImage = new ImageIcon(images_folder + "/load_file.png");
     }
 
     private void CreateMenuBar(JFrame frame) {
@@ -188,6 +195,20 @@ public class main implements ActionListener
         String cmd = e.getActionCommand();
 
         switch(cmd) {
+            case "Load level": // opens explorer panel and, if correct type of file selected, will load it
+                String levelDataString = LoadFile();
+                if (levelDataString != null) {
+                    ClearAllLevelData();
+                    PrepareLevel(levelDataString);
+
+                    LoadPlayerData(0);
+                    playerXSmooth = playerStartX;
+                    playerYSmooth = playerStartY;
+                    LoadLevel(0);
+
+                    fileLoadedYet = true;
+                }
+                break;
             case "Close game": // makes window really tiny
                 System.exit(0);
                 break;
@@ -274,7 +295,9 @@ public class main implements ActionListener
 
         drawPlayer(g);
 
-        if (finalWon) {
+        if (!fileLoadedYet) {
+            g.drawImage(loadFileInfoImage.getImage(), 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, null);
+        } else if (finalWon) {
             g.drawImage(finalWinImage.getImage(), 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, null);
         }
 
@@ -530,7 +553,51 @@ public class main implements ActionListener
         }
     }
 
-    // Luckyzelle
+    private void ClearAllLevelData(){
+        levelData.clear();
+        playerData.clear();
+
+        canMove = true;
+        finalWon = false;
+        winningFrozen = false;
+
+        blackScreenState = BlackScreenState.OFF;
+    }
+
+    private String LoadFile(){
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Liam vs Evil Liam level files (.lvel)", "lvel");
+        fileChooser.setFileFilter(filter);
+
+        int response = fileChooser.showOpenDialog(null);
+
+        if (response == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            System.out.println("selected file was " + selectedFile.getAbsolutePath());
+
+            // if file is valid lvel file;
+            if (selectedFile.getAbsolutePath().substring(selectedFile.getAbsolutePath().lastIndexOf(".") + 1).equals("lvel")) {
+                System.out.println("yayayayayayayayayy");
+
+                try {
+                    Scanner fileReader = new Scanner(selectedFile); // Reads the information stored in game_text
+                    String levelDataString = fileReader.next();
+                    fileReader.close();
+
+                    return levelDataString;
+                } catch (Exception e) {
+                    System.err.println("file can not be found, big issue!");
+                }
+            }
+        } else {
+            System.out.println("File selection cancelled");
+        }
+
+        return null;
+    }
+
     // class for detecting key presses
     private class TAdapter extends KeyAdapter {
 
@@ -714,7 +781,7 @@ cool temple level
 0 0 0 0 0 0 0 0 0 0 0 0 0
 
 0 1 1 0 0 0 0 0 0 0 1 1 0
-0 0 0 0 0 0 2 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0
 0 0 0 0 0 0 0 0 0 0 0 0 0
 0 0 0 0 0 1 1 1 0 0 0 0 0
 1 1 1 1 0 0 0 0 0 1 1 1 1
@@ -727,9 +794,91 @@ cool temple level
 0 0 0 1 0 0 1 0 0 1 0 0 0
 0 0 0 1 0 0 0 0 0 1 0 0 0
 
-1,11,00000000000000000020000000000000000000000110000011001111111111111110000000001111000010000111110011100111111001110011100000000000000000000000000000000000000000000000000000110000000110000000200000000000000000000000011100000111100000111111111000111111111100011111111111111111111111111111110000001000000000100100100000010010010000001000001000
+1,11,00000000000000000020000000000000000000000110000011001111111111111110000000001111000010000111110011100111111001110011100000000000000000000000000000000000000000000000000000110000000110000000000000000000000000000000011100000111100000111111111000111111111100011111111111111111111111111111110000001000000000100100100000010010010000001000001000
 
 Annoying wrap-around level:
 
+0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 1 0 0 0 0 0
+0 0 0 0 0 0 0 1 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 1 1 1 0 0
+0 0 1 1 1 1 0 0 1 0 0 0 0
+0 0 0 0 0 0 0 0 1 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 1 0 0 0 0 0 0 0 0 0
+
+0 0 0 0 0 0 0 0 1 0 0 0 0
+0 2 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 1 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 1 1 1 1 1
+0 0 1 1 0 1 0 0 1 1 1 1 1
+0 0 0 0 0 0 0 0 1 1 1 1 1
+0 0 0 0 0 0 0 0 1 1 1 1 1
+0 0 0 0 0 0 0 0 1 1 1 1 1
+
 0,12,00000000000000000000000000000000000000000000000000000000000000000000000010000000000001000000000000000000000000001110000111100100000000000010000000000000000000010000000000000000010000020000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000111110011010011111000000001111100000000111110000000011111
+
+
+"Test"
+0,12,
+0 0 0 0 0 0 0 0 0 0 0 0 0
+1 1 1 0 1 1 1 0 1 1 0 0 0
+0 1 0 0 1 1 0 0 1 1 0 0 0
+0 1 0 0 1 1 1 0 1 1 0 0 0
+0 0 0 0 0 0 0 0 1 1 0 0 0
+1 1 1 0 1 1 1 0 0 0 0 0 0
+1 0 0 0 0 1 0 0 1 1 0 0 0
+0 1 1 0 0 1 0 0 1 1 0 0 0
+1 1 1 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 2 0
+0 0 0 0 0 0 0 0 0 0 0 0 0
+^ x2
+
+0,12,00000000000001110111011000010011001100001001110110000000000011000111011100000010000100110000110010011000111000000000000000000000000000000000000000000000002000000000000000000000000000111011101100001001100110000100111011000000000001100011101110000001000010011000011001001100011100000000000000000000000000000000000000000000000200000000000000
+
+
+frog level
+
+2,11
+0 0 0 0 0 0 1 1 1 0 0 0 0
+0 0 0 0 0 0 1 1 1 0 1 1 0
+0 0 1 1 1 0 1 1 1 1 1 0 0
+1 0 2 0 1 0 1 1 1 1 1 0 1
+1 0 0 0 1 0 0 0 0 0 0 0 0
+0 0 1 1 1 0 1 1 1 1 1 1 0
+0 0 0 0 0 0 1 1 1 1 1 0 0
+0 0 0 0 0 0 1 1 1 1 1 1 1
+1 1 1 1 1 1 1 0 0 1 1 1 1
+1 1 1 1 1 1 1 0 0 1 1 1 1
+1 1 1 1 1 1 1 1 1 1 1 1 1
+1 1 0 0 1 1 1 1 1 1 1 1 1
+1 1 0 0 1 1 1 1 1 1 1 1 1
+
+0 0 0 0 0 0 1 1 1 1 1 1 1
+0 0 0 0 0 0 1 1 1 0 1 1 1
+0 0 1 1 1 0 1 1 1 0 1 1 1
+0 0 2 0 1 0 1 1 1 0 1 1 1
+0 0 0 0 1 0 0 0 0 0 0 0 1
+0 1 1 1 1 0 1 1 1 0 1 1 1
+0 0 0 0 0 0 1 1 1 0 1 0 1
+0 0 0 0 0 0 1 0 0 0 1 1 1
+1 1 1 1 1 1 1 0 1 0 1 1 1
+1 1 0 0 0 1 0 0 0 0 0 0 1
+1 1 0 0 0 0 0 1 0 0 1 0 1
+1 1 0 0 0 0 0 1 0 0 0 0 1
+1 1 0 0 0 0 0 0 0 0 0 1 1
+2,11,00000011100000000001110110001110111110010201011111011000100000000001110111111000000011111000000001111111111111100111111111110011111111111111111110011111111111001111111110000001111111000000111011100111011101110020101110111000010000000101111011101110000001110101000000100011111111110101111100010000001110000010010111000001000011100000000011
+
 */
